@@ -103,5 +103,42 @@ W pierwszych warstwach konwolucje wykrywają proste elementy, np. krawędzie. W 
   - silny "Gradient flow"
   - wydajny obliczeniowo
   - bardziej zróżnicowane cechy z warstw konwolucji
-- **`MobileNet`** (2017):
-- 
+- **`MobileNet` (2017)**:
+
+
+# Wykład 5
+- `Konwolucja 1D` - jest efektywna, jeśli oczekujemy znalezienia interesujących cech z krótkich fragmentów całości danych, a lokalizacja tych cech nie jest dla nas bardzo ważna.
+  - przykładem wykorzystania jest analiza genomu
+  - jest przydatna do analizy np. danych z czujników (do szeregów czasowych)
+- `Konwolucja 3D` - przydatna do analiz ruchu, danych medycznych (3D skany mózgu itp.) itp.
+- `Style transfer` - transfer stylu jednego obrazu na inny obraz
+  - z jednego obrazu wyciągane są obiekty, z drugiego styl, a następnie to dane są mergowane
+  - w sieciach CNN początkowe warstwy dobrze radzą sobie z wyciąganiem stylu, a dalsze z wyciąganiem obiektów i ich klasyfikacją
+  - co każdą epokę poprawiane są straty związane ze stylem i obiektami, po kilkudziesięciu / kilkuset epokach powinniśmy uzyskać obraz bardzo podobony treściowo i stylowo do obrazów podanych na wejście
+- **`Autoencoder`** - typ sieci, który pozwala na np. odtworzenie zaszumionych zdjęć, skanowanie dokumentów czy implementacje takich aplikacji jak np. FaceSwap. `Autoencoder` składa się z enkodera i dekodera. Enkoder przetwarza wejście na formę skompresowaną, a następnie dekoder próbuje to wejście odtworzyć.
+  - enkoder i dekoder są trochę lustrzanymi odbiciami: enkoder przeprowadza konwolucje i poolingi, podczas gdy dekoder dekonwolucje i unpoolingi
+  - zanim sieć zostanie nakarmiona wejściem, na obraz wejściowy nakłada się trochę szumu
+- `U-net` - idea podobna do autoencodera, z tą różnicą, że wyniki kompresji przesyłane są na odpowiadające jej warstwy dekompresji, co pozwala na segmentacje obrazu
+
+# Wykład 6
+Modele do klasyfikacji (np. VGG-16, ResNet itp.) nie radzą sobie dobrze dla obrazów, które zawierają wiele obiektów. Należy najpierw z obrazu wyciągnąć pojedyczne obiekty, które następnie poddawane są klasyfikacji - do tego służą **modele detekcji i segmentacji**.
+- `semantic segmantation` - klasyfikacja każdego piksela obrazu do określonych klas
+- `classification + localization` - klasyfikacja oraz lokalizacja obiektu na obrazie (ograniczenie do 1 obiektu)
+- `object detection` - bardzie ogólny przypadek klasyfikacji i lokalizacji: wykrycie wszystkich obiektów na ekranie (znalezienie boxa dla nich) i ich klasyfikacja
+- `instance segmentation` - semantyczna segmentacja, ale odróżniamy obiekty tej samej klasy od siebie
+
+W detekcji obiektów pojawia się problem - jak ocenić skuteczność predykcji (jak porównać ze sobą boxy)? Mozna użyć **`Intersection over Union`**, który oblicza stosunek części wspólnej boxów do ich sumy.
+- jest lepszy od `pixel accuracy` (procent dobrze sklasyfikowanych pikseli), m.in. dlatego, że działa lepiej dla bardzo niezbalansowanych zbiorów klas
+
+Metody detekcji:
+- `sliding method` - podział zdjęcia na komórki, a później iteracja po nich oknem i sprawdzanie zawartości. Jest to metoda wolna i potencjalnie nieskuteczna (co jeśli obiekty mogą mieć bardzo skrajne rozmiary, jaki rozmiar okna wtedy dobrać?)
+- `selective search` - dzielimy obraz na regiony, które są do siebie podobne kolorem, teksturą, rozmiarem albo kształtem. Algorytm działa w sposób iteracyjny:
+  1. Wygeneruj bardzo posegmentowaną reprezentację obrazu
+  2. Dodaj wszystkie obliczone boxy do listy `Regions proposals`
+  3. Zgrupuj sąsiadujące boxy uwzględniając ich podobieństwo
+  4. Idź do 2  
+  Algorytm działa bardzo szybko i generuje zdecydowanie mniej boxów od `sliding method`
+
+- **`R-CNN`** (2012):
+  - wykorzystuje `selective search`, który odnajduje 2000 RoI (`Regions of interest` / `Region proposals`)
+  - każdy region przepuszczany jest przez sieć CNN
