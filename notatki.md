@@ -200,3 +200,30 @@ Pojawia się pytanie: jak ocenić skuteczność GAN? Można do tego wykorzystać
 `GAN` generuje losowe obrazy z szumu - co jeśli chcemy uzyskać obrazy z konkretnej klasy? Można do tego wykorzystać `Conditional GAN`:
 - generator posiada dodatkowe wejście: klasę obiektu do wygenerowania
 - dyskryminator dostaje informację o klasie obiektu przed samę oceną
+
+
+# Wykład 8
+## Data augmentation
+Im więcej danych, tym lepiej. Gdy mamy za mało danych, można wygenerować nowe z dotychczasowych. Metoda ta nazywa się **`data augmentation`**. Jest wiele metod, np. odwrócenie obracu, rotacja, skalowanie, przycinanie, translacja, dodawania szumu, zmiana kolorów, blur, jasność, saturacja. Do bardziej wyszukanych metod można zaliczyć Style transfer, GAN, wycinanie losowych częsci obrazka (obstrukcja). Metody można łączyć ze soba.  
+Dla augmentacji należy wybrać odpowiednie metody, aby odzwierciedlić scenariusze wzięte z życia. Zły wybór metod może pogorszyć dokładność modelu. Należy też pamiętać, że prawdziwe dane są zawsze lepsze od wygenerowanych.  
+Nalezy pamiętać o transformacji boxów!
+
+## Transfer learning
+**`Transfer learning`** - metoda wykorzystywania nauczonych już modeli do klasyfikacji nowych danych.  
+Pierwsze warstwy DNN wykrywają proste wzory, np. krawędzie. Dalsze warstwy wykrywają coraz to bardziej szczegółowe cechy. Można uciąć końcowe warstwy i w ich miejsce dodać własne - dzięki temu model się uczy dużo szybciej i działa wystarczająco dobrze nawet po nakarmieniu go małą ilością danych.  
+Najczęściej podmieniamy ostatnią warstwę, ale oprócz tego można przetrenować niektóre warstwy - wtedy mówimy o `fine tuning`. Możemy wtedy zamrozić niektóre wagi. Użycie tej metody wymaga to od nas większej wiedzy o wykorzystywanym modelu.
+
+Czasami mamy bardzo mało zdjęc dla danej klasy, albo chcemy często dodawać nowe klasy. Wtedy przyda się metoda `One shot learning` - jest to wariant `transfer learningu`, gdzie uczymy model z wykorzystaniem tylko jednego lub kilku przykładów.  
+Według niektórych źródeł dotrenowywanie modelu częścią datasetu, która była przeznaczona na walidację, stanowi `Fite tuning`.
+
+## Ataki na CNN
+Jak zmylić sieć? Istnieje wiele metod ataku:
+- `Fast Gradient Sign Method (FSGM)` - typ ataku, w którym złoczyńca ma pełen dostęp do modelu. Może on przygotować specjalny szum, który odkształca wejście, dzięki czemu model może być nawet w 99% pewny że na obrazku pandy widzi gibona. Niesamowite w tym rozwiązaniu jest to, że zniekształcony obraz jest nie do odróżnienia przez ludzkie oko od oryginalnego.
+- `Jacobian-based saliency map (JSMA)` - tutaj zmienane jest parę pikseli obrazka,
+- `One pixel attack` - a tutaj tylko jeden
+- `Adversarial patch` - specjalnie przygotowane obrazki, które mogą być wykorzystane w prawdziwym życiu. Są uniwersalne (mogą być wykorzystane gdziekolwiek), nawet poddane transformacji mogą działać i można z ich wykorzystaniem targetować konkretne klasy.
+
+Metody ochrony:
+- `Adversarial training` - nauczenie się ataków, np. poprzez dodanie zaszumionych zdjęć do zbioru danych
+- rozmycie, kompresja, redukcja cech - zaszumianie danych, dzięki czemu wyspecjalizowane ataki takie jak `FSGM` są nieskuteczne
+- można również wykorzystać autoencoder
