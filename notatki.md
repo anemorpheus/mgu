@@ -187,3 +187,16 @@ Metody detekcji:
     3. Dla każdego boxu obliczane są klasy
     4. Uruchamiany jest algorytm `Non-maximum suppresion`
   - działa szybciej od `YOLO`, ale jest mniej dokładny
+
+
+# Wykład 7
+Sieci potrafiły malować kopie obrazów, ale nie potrafiły stworzyć obrazów od zera. Na pomoc przyszły sieci **`GAN`**. Są to sieci złożone z dwóch mniejszych sieci: **generatora i dyskryminatora**.  
+- generator - generuje z szumu podróbki
+- dyskryminator - próbuje rozróżnić podróbki od prawdziwych obrazów  
+Obie sieci patrząc na strukturę przypominają swoje lustrzane odbicie.  
+
+Pojawia się pytanie: jak ocenić skuteczność GAN? Można do tego wykorzystać `FID` (`Frechet Inception Distance`) - prawdziwe obrazy i podróbki są przepuszcane przez sieć `Inception`, a następnie mierzony jest dystans pomiędzy nimi: im są bliższe, tym podróbka jest lepsza.
+
+`GAN` generuje losowe obrazy z szumu - co jeśli chcemy uzyskać obrazy z konkretnej klasy? Można do tego wykorzystać `Conditional GAN`:
+- generator posiada dodatkowe wejście: klasę obiektu do wygenerowania
+- dyskryminator dostaje informację o klasie obiektu przed samę oceną
