@@ -139,6 +139,51 @@ Metody detekcji:
   4. Idź do 2  
   Algorytm działa bardzo szybko i generuje zdecydowanie mniej boxów od `sliding method`
 
-- **`R-CNN`** (2012):
-  - wykorzystuje `selective search`, który odnajduje 2000 RoI (`Regions of interest` / `Region proposals`)
-  - każdy region przepuszczany jest przez sieć CNN
+- **`R-CNN` (2012)**:
+  - algorytm działa w następujących krokach
+    - wykorzystuje `selective search`, który odnajduje 2000 RoI (`Regions of interest` / `Region proposals`)
+    - każdy region przepuszczany jest przez sieć CNN, która zwraca wektor cech
+    - cechy są przekazywane do `SVM`, który klasyfikuje regiony
+      - cechy ze wszystkich regionów przemnażane są przez klasy detekcji, wybierane są te, które mają `IoU` > 0.3
+    - dodatkowo używany jest `Bounding box regressor`, czyli sieć która na zależnie od wykrytej klasy obiektu poprawia boxy
+      - na wejście bierze lokalizacje regionu i podczas trenowania porównuje z prawdziwymi boxami
+      - po trenowaniu wybierany jest odpowiedni regressor dla klasy, który mapuje lokalizację regionu
+  - problemy R-CNN:
+    - długio czas analizy
+    - niezmienny `selective search algorithm` generujący błędne regiony
+    - długi proces nauki (ponieważ wykorzystujemy wiele sieci)
+- **`Fast R-CNN` (2014)**:
+  - pomysł jest następujący: po co uruchamiać CNN dla każdego regionu, kiedy można uruchomić CNN dla całego obrazka, a wygenerowaną mapę cech podzielić na regiony z `salective search`?
+  - wykorzystuje `RoI Pooling` - na mapę wektorów cech nakładane są regiony. Ponieważ do klasyfikacji chcemy mieć dane o tym samym rozmiarze, wszystkie regiony poolujemy do określonego rozmiaru
+  - przyspieszyliśmy działanie sieci, ale tym razem to generowanie regionów zajmuje najwięcej czasu
+- **`Faster R-CNN` (2015)**:
+  - rezygnujemy z `selective search` na rzecz `RPN` (`Regional Proposal Network`) - sieci CNN generującej regiony korzystającej z wygenerowanej przez poprzednią sieć mapą cech:
+    1. Generowane są środki `anchorów` dla obrazu (potencjalne środki boxów)
+    2. Dla każdego ze środków generowane są `anchory` - kilkanaście potenchalnych boxów
+    3. Nasza sieć `RPN` klasyfikuje, które regiony mają obiekt
+  - może być wykorzystywana w czasie rzeczywistym
+- **`YOLO` (2014)**:
+  - tutaj jedna sieć oblicza boxy i prawodpodobieństwo klas dla tych boxów
+  - sposób działania:
+    1. Obraz dzielony jest na komórki SxS, np. 13x13
+    2. Dla każdej z komórek równolegle:
+      - generuje się 5 ramek, a każdej z nich przypisuje się `confidence score`
+      - każda z komórek przewiduje klasę
+    3. Oba wyniki łączone są w jeden - prawdopodobieństwo występowania obiektu jest przemnażane przez wszystkie prawdopdobieństwa klas dla danego boxa
+    4. Zostawiamy tylko te ramki, które mają dobry wynik
+   - `YOLO` jest dużo szybsze od wszystkich wariantów `R-CNN`, ale jest mniej dokładne
+   - wykorzystuje **`Non-maximum suppresion`**: algorytm, który zmniejsza liczbę boxów na końcu działania
+     - algorytm bierze tylko najlepsze boxy, a te, które w dużym stopniu przecinają się z nim (obliczane to jest z wykorzystaniem `IoU`) są pomijane
+- `YOLOv2` (2016):
+  - *Better, Faster, Stronger*
+  - używa autorską sieć DarkNet
+- `YOLOv3` (2018):
+  - *Better, Not Faster, Stronger*
+  - wylicza więcej boxów niż `YOLOv2`
+- **`SSD` (2015)**:
+  - podobne do `Faster R-CNN`:
+    1. Konwolucja przetwarza cały obraz i generuje mapę cech
+    2. Dla każdej komórki generowane są boxy
+    3. Dla każdego boxu obliczane są klasy
+    4. Uruchamiany jest algorytm `Non-maximum suppresion`
+  - działa szybciej od `YOLO`, ale jest mniej dokładny
