@@ -227,3 +227,27 @@ Metody ochrony:
 - `Adversarial training` - nauczenie się ataków, np. poprzez dodanie zaszumionych zdjęć do zbioru danych
 - rozmycie, kompresja, redukcja cech - zaszumianie danych, dzięki czemu wyspecjalizowane ataki takie jak `FSGM` są nieskuteczne
 - można również wykorzystać autoencoder
+
+# Wykład 12
+`Reinforcement learning` - obok uczenia nadzorowanego i nienadzorowanego, trzeci rodzaj uczenia maszynowego. Maszyna (`Agent`) otrzymuje gotowy zestaw dozwolonych działań, akcji, reguł. Działając w ich ramach, dokonuje analizy i obserwuje ich skutki. Agent komunikuje się ze `Środowiskiem`, który otrzymuje informacje o akcjach, a zwraca informacje o kolejnym stanie i nagrodzie:
+- Agent przekazuje informacje o obecnym stanie i akcji, którą chce podjąć
+- Środowisko zwraca informacje o kolejnym stanie oraz nagrodzie, za wykonanie akcji  
+Do nauki można uzyć zwykłej sieci neuronowej, która dostaje informacje o stanie i zwraca kolejne akcje. W przypadku gier sieć może generować komendy. Problem się pojawia, w jaki sposób poprawiać działanie tej sieci? Można założyć, że ostatnie komendy są decydujące i w przypadku, gdy seria komend doprowadzi do przegranej, najmocniej karać właśnie te ostatnie.
+
+## Policy vs value
+Istnieją dwa podstawowe algorytmy wykorzystywane do nauki: `value-iteration` oraz `policy-iteration`. Oba zakładają, że agent zna środowisko (zna możliwe stany, akcje, nagrody), dzięki czemu może zaplanować swoje działanie *offline*.  
+Wprowadza się pojęcie `value function` - funkcji `V(s)`, która mówi, jak dobry jest stan dla agenta i jest równa całkowitej oczekiwanej nagrodzie dla agenta, który startuje ze stanu `s` (czyli zależy też od przyszłych wyborów agenta, inaczej mówiąc od jego polityki).  
+`Policy iteration` polega na poprawianiu polityki, a `value iteration` na poprawianiu funkcji wartości.
+
+## Q-learning
+`Q-learning` to rodzaj algorytmu, który działa *online* - nie ma pełnych informacji o środowisku, aby dowiedzieć się o nagrodach musi eksplorować. Do wybory każdej wykorzystuje równanie Bellmana. Dane przechowuje w tzw. `Q table`, która mapuje akcję i stan na wartości. Działa w następujący krokach:
+1. Inicjalizuj tabelę Q
+2. Wybierz akcję a
+3. Wykonaj akcję
+4. Oblicz nagrodę
+5. Zaktualizuj Q
+6. Idź do kroku 2
+
+A co jeśli `Q table` jest ogromne (np. 10000 stanów i 1000 akcji per stan)? Może zamiast tabeli użyć uczenia maszynowego, który szacowałby wartości Q. Mówimy wtedy o `Deep Q learning`.
+Na wejście takiej sieci dajemy stan, a zwraca ona wartości Q dla wszystkich możliwych akcji.
+
