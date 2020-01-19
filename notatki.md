@@ -228,6 +228,44 @@ Metody ochrony:
 - rozmycie, kompresja, redukcja cech - zaszumianie danych, dzięki czemu wyspecjalizowane ataki takie jak `FSGM` są nieskuteczne
 - można również wykorzystać autoencoder
 
+
+# Wykład 9
+Wykorzystanie modeli CNN w telefonach jest problematyczne, ponieważ:
+- modele mogą mieć dużo parametrów, a co za tym idzie, zajmować dużo miejsca w pamieci, 
+- mają dużo operacji, przez co mogą działać wolno na słabszych urządzeniach bez dedykowanego GPU,
+- Android korzysta z Javy -> jak przenieść model napisany w Pythonie do Javy?
+- ciężko jest pisać CNN w Javie
+
+Jak można zmniejszyć rozmiar i przyspieszyć działanie sieci?
+- redukcja warstw FC
+- zmniejszanie rozmiaru kerneli dla warstw konwolucyjnych
+- optymalizacja downsamplingu
+  - wczesny pooling znacznie przyspiesza sieć
+  - późny pooling zwiększa efektywność, ale spowalnia sieć
+  - równo rozłożony pooling - zapewnia równowagę pomiędzy wielkością sieci i jej skutecznością
+  - `pruning` - kosztem dokładności można usunąć te wagi, które mają najmniejszy wpływ na działanie sieci
+  - kwantyfikacja
+    - bardzo podobne wagi są wyrównywane, a następnie ich reprezentacja przecinkowa (która zajmuje dużo pamięci) jest wpisywana do pewnego rejestru
+    - waga w modelu staje się wtedy referencją do wagi w rejestrze
+
+Jak można zmniejszyć liczbę operacji podczas konwolucji? Można skorzystać z `Depthwise convolution` oraz `Pointwise convolution` (korzysta się najcześciej z obu po kolei).  
+- `Depthwise convolution` - zamiast np. przetwarzania 3-kanałowego obrazu 256 filtrami, można przetworzyć go raz jednym filtrem, gdzie konwolucje obliczane są oddzielnie dla każdego kanału (otrzymamy na wyjściu tyle samo kanałów)
+- `Pointwise convolution` - w zasadzie standardowa konwolucja 1x1, ale jest bezpośrednio powiazana z `Depthwise convolution`. Można użyć 256 filtrów, aby rozszerzyć obraz do 256 kanałów.  
+W porównaniu do zwykłej konwolucji, drastycznie zmniejszamy liczbę potrzebnych operacji. Zamiast przetwarzania obrazu 256 razy przetwarzamy go tylko raz, a później go tylko rozszerzamy.
+
+- `MobileNet` - wykorzystuje konwolucje `depthwise` oraz `pointwise` w celu zmniejszenia ilości operacji
+  - korzysta z ReLU6
+- `MobileNetV2` - wykorzystuje dodatkowe warstwy `Expansion` i `Projection`, które rozszerzają i zmniejszają dane na potrzeby przeprowadzenia konwolucji `Depthwise`
+  - te bloki nazywamy `bottleneckami`
+  - kompresje i dekompresje pozwalają na dalsze zmniejszenie parametrów i operacji
+  - dodaje `Skip connection` (`Shortcut connection`, połączenie rezydualne) dla bloków, podobnie jak w `ResNet`
+- `SqueezeNet` - korzysta z modułów `fire`. W porównaniu do 240MB `AlexNetu`, waży tylko 5MB. Udaje się to m.in. dzięki ściskaniu (z wykorzystaniem konwolucji 1x1) oraz rozszerzaniu (z wykorzystaniem konwolucji 1x1 i 3x3)
+- `ShuffleNet`:
+  - wykorzystuje konwolucje grupujące (`gconv`), dla których kanały wejściowe są grupowane, a konwolucje są przeprowadzane oddzielnie dla każdej grupy
+  - wykorzystuje warstwe `shuffle`, która miesza kanały. Z połączeniem z konwolucjami grupującymi, może uzależnić je od siebie.
+  - rozwija koncepcje wykorzystane w `MobileNetV2` (też ma bloki rezydualne, też kompresuje i rozszerza dane)
+
+
 # Wykład 12
 `Reinforcement learning` - obok uczenia nadzorowanego i nienadzorowanego, trzeci rodzaj uczenia maszynowego. Maszyna (`Agent`) otrzymuje gotowy zestaw dozwolonych działań, akcji, reguł. Działając w ich ramach, dokonuje analizy i obserwuje ich skutki. Agent komunikuje się ze `Środowiskiem`, który otrzymuje informacje o akcjach, a zwraca informacje o kolejnym stanie i nagrodzie:
 - Agent przekazuje informacje o obecnym stanie i akcji, którą chce podjąć
