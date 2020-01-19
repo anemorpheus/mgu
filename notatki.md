@@ -243,10 +243,10 @@ Jak można zmniejszyć rozmiar i przyspieszyć działanie sieci?
   - wczesny pooling znacznie przyspiesza sieć
   - późny pooling zwiększa efektywność, ale spowalnia sieć
   - równo rozłożony pooling - zapewnia równowagę pomiędzy wielkością sieci i jej skutecznością
-  - `pruning` - kosztem dokładności można usunąć te wagi, które mają najmniejszy wpływ na działanie sieci
-  - kwantyfikacja
-    - bardzo podobne wagi są wyrównywane, a następnie ich reprezentacja przecinkowa (która zajmuje dużo pamięci) jest wpisywana do pewnego rejestru
-    - waga w modelu staje się wtedy referencją do wagi w rejestrze
+- `pruning` - kosztem dokładności można usunąć te wagi, które mają najmniejszy wpływ na działanie sieci
+- kwantyfikacja
+  - bardzo podobne wagi są wyrównywane, a następnie ich reprezentacja przecinkowa (która zajmuje dużo pamięci) jest wpisywana do pewnego rejestru
+  - waga w modelu staje się wtedy referencją do wagi w rejestrze
 
 Jak można zmniejszyć liczbę operacji podczas konwolucji? Można skorzystać z `Depthwise convolution` oraz `Pointwise convolution` (korzysta się najcześciej z obu po kolei).  
 - `Depthwise convolution` - zamiast np. przetwarzania 3-kanałowego obrazu 256 filtrami, można przetworzyć go raz jednym filtrem, gdzie konwolucje obliczane są oddzielnie dla każdego kanału (otrzymamy na wyjściu tyle samo kanałów)
@@ -264,6 +264,23 @@ W porównaniu do zwykłej konwolucji, drastycznie zmniejszamy liczbę potrzebnyc
   - wykorzystuje konwolucje grupujące (`gconv`), dla których kanały wejściowe są grupowane, a konwolucje są przeprowadzane oddzielnie dla każdej grupy
   - wykorzystuje warstwe `shuffle`, która miesza kanały. Z połączeniem z konwolucjami grupującymi, może uzależnić je od siebie.
   - rozwija koncepcje wykorzystane w `MobileNetV2` (też ma bloki rezydualne, też kompresuje i rozszerza dane)
+
+
+# Wykład 10
+Cieżko jest analizować i przetwarzać dane ciągłe (czasowe) z wykorzystaniem sieci neuronowych. Sieci dobrze radzą sobie z analizą stanów, ale nie ich zmianą w czasie w przypadku np. muzyki, tekstu i video, gdzie ważna jest kolejność informacji. Aby sobie z tym poradzić, wykorzystuje się **`sieci rekurencyjne`**, które zawierają pętle i posiadają pamięć.  
+`Recurrent Neural Network` - rekurencyjna sieć neuronowa, która pozwala na operacje na sekwencjach wektorów. Sieć ta może wykorzystywać połączenia:
+  - *fixed to fixed* - normalna sieć neuronowa, np. klasyfikacja zdjęć
+  - *fixed to sequence* - dla jednego wejścia generuje sekwencję wyjść, np. tworzenie podpisów do zdjęć
+  - *sequence to fixed* - dla sekwencji na wejściu generuje jedno wyjście, np. ocena, czy zdanie jest negatywne czy pozytywne
+  - *sequence to sequence* - dla sekwencji na wejściu generuje sekwencję na wyjściu, np. tłumaczenie tekstu
+  - *sequence to sequence synced* - dla sekwencji na wejściu dostajemy zsynchronizowaną sekwencję na wyjściu, np. klasyfikacja każdej klatki filmu
+
+Sieci rekurencyjne akceptują wektor *x*, a na wejście dają wektor *y*, który jest obliczony z uwzględnieniem poprzednich wejść.
+RNN może nie działać dobrze, ponieważ narażony jest na `Gradient Vanishing problem` - mają krótką pamięć.
+
+`LSTM (Long Short Term Memory)` - moduł RNN, który decyduje, czy daną informację warto zachować czy usunąć w zależności od jej przydatności. Każdy moduł składa się z pamięci krótkiej i długiej. Moduły te pomagają w zachowaniu pamięci długotrwałej, są mniej narażone na problem zanikania gradientu.  
+`GRU (Gated Reccurent Unit)` - podobny do LSTM, z tą różnicą, że posiada jedną nić czasową (jedno wejście czasowe). Również wykorzystuje bramki resetujące i uaktualniające pamięć.
+
 
 
 # Wykład 12
